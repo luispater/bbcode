@@ -110,11 +110,11 @@ func CompileText(in *BBCodeNode) string {
 func CompileRaw(in *BBCodeNode) *HTMLTag {
 	out := NewHTMLTag("")
 	if in.ID == TEXT {
-		out.Value = in.Value.(string)
+		out.Value = strings.Trim(in.Value.(string), "\n\r")
 	} else if in.ID == CLOSING_TAG {
-		out.Value = in.Value.(BBClosingTag).Raw
+		out.Value = strings.Trim(in.Value.(BBClosingTag).Raw, "\n\r")
 	} else {
-		out.Value = in.Value.(BBOpeningTag).Raw
+		out.Value = strings.Trim(in.Value.(BBOpeningTag).Raw, "\n\r")
 	}
 	for _, child := range in.Children {
 		out.AppendChild(CompileRaw(child))
@@ -240,10 +240,20 @@ func init() {
 	DefaultTagCompilers["code"] = func(node *BBCodeNode) (*HTMLTag, bool) {
 		out := NewHTMLTag("")
 		out.Name = "pre"
-		for _, child := range node.Children {
-			out.AppendChild(CompileRaw(child))
+		value := node.GetOpeningTag().Value
+
+		code := NewHTMLTag("")
+		code.Name = "code"
+		if value == "" {
+			code.Attrs["class"] = "goland"
+		} else {
+			code.Attrs["class"] = value
 		}
-		return out, false
+
+		for _, child := range node.Children {
+			code.AppendChild(CompileRaw(child))
+		}
+		return out.AppendChild(code), false
 	}
 
 	for _, tag := range []string{"i", "b", "u", "s"} {
