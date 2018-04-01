@@ -245,7 +245,7 @@ func init() {
 		code := NewHTMLTag("")
 		code.Name = "code"
 		if value == "" {
-			code.Attrs["class"] = "goland"
+			code.Attrs["class"] = "golang"
 		} else {
 			code.Attrs["class"] = value
 		}
